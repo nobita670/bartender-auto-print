@@ -1,0 +1,39 @@
+name: Build EXE
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号'
+        required: false
+        default: 'v1.0.0'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 用PyInstaller打包
+      run: |
+        pyinstaller --onefile --windowed --name="Bartender自动打印工具" --add-data="config.py;." main.py
+        
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: Bartender自动打印工具
+        path: dist/*.exe
